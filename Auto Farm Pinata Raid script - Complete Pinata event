@@ -1,24 +1,20 @@
--- LocalScript in StarterGui
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "VoidScriptLoading"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- Create background frame (void black)
 local background = Instance.new("Frame")
 background.Size = UDim2.new(1, 0, 1, 0)
 background.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 background.BorderSizePixel = 0
 background.Parent = screenGui
 
--- "Void script" title
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0, 400, 0, 80)
 title.Position = UDim2.new(0.5, -200, 0.35, 0)
@@ -31,7 +27,6 @@ title.TextStrokeTransparency = 0.8
 title.TextStrokeColor3 = Color3.fromRGB(100, 0, 150)
 title.Parent = background
 
--- Loading bar background
 local barBg = Instance.new("Frame")
 barBg.Size = UDim2.new(0, 400, 0, 20)
 barBg.Position = UDim2.new(0.5, -200, 0.55, 0)
@@ -39,14 +34,12 @@ barBg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 barBg.BorderSizePixel = 0
 barBg.Parent = background
 
--- Loading bar fill (purple gradient effect)
 local barFill = Instance.new("Frame")
 barFill.Size = UDim2.new(0, 0, 1, 0)
 barFill.BackgroundColor3 = Color3.fromRGB(147, 0, 211)
 barFill.BorderSizePixel = 0
 barFill.Parent = barBg
 
--- Percentage text
 local percentText = Instance.new("TextLabel")
 percentText.Size = UDim2.new(0, 100, 0, 30)
 percentText.Position = UDim2.new(0.5, -50, 0.6, 10)
@@ -57,7 +50,6 @@ percentText.TextSize = 24
 percentText.Font = Enum.Font.GothamBold
 percentText.Parent = background
 
--- Status text (optional flavor)
 local statusText = Instance.new("TextLabel")
 statusText.Size = UDim2.new(0, 400, 0, 25)
 statusText.Position = UDim2.new(0.5, -
