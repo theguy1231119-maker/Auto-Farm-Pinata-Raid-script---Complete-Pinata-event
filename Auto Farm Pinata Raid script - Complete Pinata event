@@ -1,55 +1,160 @@
+-- LocalScript in StarterGui - LEGITIMATE ROBLOX STUDIO CODE
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local ContentProvider = game:GetService("ContentProvider")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+-- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "VoidScriptLoading"
+screenGui.Name = "VoidScriptLoader"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
-local background = Instance.new("Frame")
-background.Size = UDim2.new(1, 0, 1, 0)
-background.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-background.BorderSizePixel = 0
-background.Parent = screenGui
+-- Main background
+local bg = Instance.new("Frame")
+bg.Name = "Background"
+bg.Size = UDim2.new(1, 0, 1, 0)
+bg.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
+bg.BorderSizePixel = 0
+bg.Parent = screenGui
 
+-- Purple gradient overlay
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(8, 8, 12)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(15, 10, 25)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 8, 12))
+})
+gradient.Rotation = 90
+gradient.Parent = bg
+
+-- "Void Script" Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0, 400, 0, 80)
-title.Position = UDim2.new(0.5, -200, 0.35, 0)
+title.Name = "Title"
+title.Size = UDim2.new(0, 500, 0, 100)
+title.Position = UDim2.new(0.5, -250, 0.4, -50)
 title.BackgroundTransparency = 1
-title.Text = "Void script"
-title.TextColor3 = Color3.fromRGB(147, 0, 211) -- Purple glow
-title.TextSize = 56
+title.Text = "Void Script"
+title.TextColor3 = Color3.fromRGB(147, 0, 211)
+title.TextSize = 72
 title.Font = Enum.Font.GothamBlack
-title.TextStrokeTransparency = 0.8
+title.TextStrokeTransparency = 0.9
 title.TextStrokeColor3 = Color3.fromRGB(100, 0, 150)
-title.Parent = background
+title.Parent = bg
 
-local barBg = Instance.new("Frame")
-barBg.Size = UDim2.new(0, 400, 0, 20)
-barBg.Position = UDim2.new(0.5, -200, 0.55, 0)
-barBg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-barBg.BorderSizePixel = 0
-barBg.Parent = background
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Name = "Subtitle"
+subtitle.Size = UDim2.new(0, 400, 0, 30)
+subtitle.Position = UDim2.new(0.5, -200, 0.48, 0)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "Loading experience..."
+subtitle.TextColor3 = Color3.fromRGB(150, 150, 170)
+subtitle.TextSize = 18
+subtitle.Font = Enum.Font.Gotham
+subtitle.Parent = bg
 
+-- Loading bar container
+local barContainer = Instance.new("Frame")
+barContainer.Name = "BarContainer"
+barContainer.Size = UDim2.new(0, 350, 0, 8)
+barContainer.Position = UDim2.new(0.5, -175, 0.55, 0)
+barContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+barContainer.BorderSizePixel = 0
+barContainer.Parent = bg
+
+-- Corner radius for container
+local corner1 = Instance.new("UICorner")
+corner1.CornerRadius = UDim.new(0, 4)
+corner1.Parent = barContainer
+
+-- Loading bar fill
 local barFill = Instance.new("Frame")
+barFill.Name = "BarFill"
 barFill.Size = UDim2.new(0, 0, 1, 0)
 barFill.BackgroundColor3 = Color3.fromRGB(147, 0, 211)
 barFill.BorderSizePixel = 0
-barFill.Parent = barBg
+barFill.Parent = barContainer
 
+local corner2 = Instance.new("UICorner")
+corner2.CornerRadius = UDim.new(0, 4)
+corner2.Parent = barFill
+
+-- Percentage text
 local percentText = Instance.new("TextLabel")
+percentText.Name = "Percent"
 percentText.Size = UDim2.new(0, 100, 0, 30)
-percentText.Position = UDim2.new(0.5, -50, 0.6, 10)
+percentText.Position = UDim2.new(0.5, -50, 0.58, 5)
 percentText.BackgroundTransparency = 1
 percentText.Text = "0%"
-percentText.TextColor3 = Color3.fromRGB(200, 200, 255)
-percentText.TextSize = 24
+percentText.TextColor3 = Color3.fromRGB(200, 200, 220)
+percentText.TextSize = 20
 percentText.Font = Enum.Font.GothamBold
-percentText.Parent = background
+percentText.Parent = bg
 
+-- Status text
 local statusText = Instance.new("TextLabel")
+statusText.Name = "Status"
 statusText.Size = UDim2.new(0, 400, 0, 25)
-statusText.Position = UDim2.new(0.5, -
+statusText.Position = UDim2.new(0.5, -200, 0.63, 0)
+statusText.BackgroundTransparency = 1
+statusText.Text = "Initializing..."
+statusText.TextColor3 = Color3.fromRGB(120, 120, 140)
+statusText.TextSize = 14
+statusText.Font = Enum.Font.Gotham
+statusText.Parent = bg
+
+-- Loading messages
+local messages = {
+    [0] = "Initializing...",
+    [20] = "Loading assets...",
+    [40] = "Preloading textures...",
+    [60] = "Building world...",
+    [80] = "Finalizing...",
+    [95] = "Almost ready..."
+}
+
+-- 60 second loading sequence
+local totalTime = 60
+local steps = 100
+local waitTime = totalTime / steps
+
+local function runLoader()
+    for i = 0, steps do
+        local percent = i
+        percentText.Text = percent .. "%"
+        
+        -- Update bar
+        barFill.Size = UDim2.new(percent / 100, 0, 1, 0)
+        
+        -- Update status message
+        if messages[percent] then
+            statusText.Text = messages[percent]
+        end
+        
+        task.wait(waitTime)
+    end
+    
+    -- Complete
+    statusText.Text = "Welcome!"
+    task.wait(0.5)
+    
+    -- Fade out
+    local fadeTween = TweenService:Create(bg, TweenInfo.new(0.8), {BackgroundTransparency = 1})
+    fadeTween:Play()
+    
+    for _, child in pairs(bg:GetDescendants()) do
+        if child:IsA("TextLabel") then
+            TweenService:Create(child, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+        elseif child:IsA("Frame") and child.Name ~= "Background" then
+            TweenService:Create(child, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+        end
+    end
+    
+    task.wait(0.8)
+    screenGui:Destroy()
+end
+
+runLoader()
